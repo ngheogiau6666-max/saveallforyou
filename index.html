@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>saveallforyou</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090D; --panel:#0D0F16; --panel2:#10131C; --line:#1C212E;
+  --cyan:#00F0FF; --green:#00FF9D; --purple:#B26CFF; --pink:#FF4FD8;
+  --text:#D7E3F4; --dim:#6B7A93; --danger:#FF4C5E;
+  --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans)}
+body{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:50;background:var(--bg)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:40;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.015) 0px,rgba(255,255,255,.015) 1px,transparent 1px,transparent 3px);
+  mix-blend-mode:overlay;opacity:.5}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px}
+a{color:inherit}
+.app{display:flex;height:100vh;height:100dvh}
+/* sidebar */
+.side{width:260px;flex:0 0 260px;background:var(--panel);border-right:1px solid var(--line);
+  display:flex;flex-direction:column;padding:18px 14px;overflow-y:auto}
+.logo{font-family:var(--mono);font-weight:700;font-size:15px;color:var(--cyan);letter-spacing:.5px;
+  display:flex;align-items:center;gap:8px;padding:4px 8px 22px}
+.logo span{color:var(--green)}
+.navgroup{margin-bottom:18px}
+.navgroup h4{font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:1.5px;padding:0 10px 8px;font-weight:500}
+.navitem{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:6px;font-size:13.5px;
+  color:var(--dim);cursor:pointer;border:1px solid transparent;transition:.15s}
+.navitem:hover{color:var(--text);background:rgba(255,255,255,.03)}
+.navitem.active{color:var(--cyan);background:rgba(0,240,255,.06);border-color:rgba(0,240,255,.25);
+  box-shadow:0 0 14px rgba(0,240,255,.08) inset}
+.navitem svg{width:15px;height:15px;flex:0 0 15px}
+/* main */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.header{height:58px;flex:0 0 58px;border-bottom:1px solid var(--line);display:flex;align-items:center;
+  gap:14px;padding:0 20px;background:var(--panel)}
+.search{flex:1;max-width:420px;display:flex;align-items:center;gap:8px;background:var(--panel2);
+  border:1px solid var(--line);border-radius:7px;padding:8px 12px;color:var(--dim)}
+.search input{background:none;border:none;outline:none;color:var(--text);font-size:13px;width:100%;font-family:var(--sans)}
+.btn{font-family:var(--mono);font-size:12px;font-weight:500;border-radius:6px;padding:8px 14px;cursor:pointer;
+  border:1px solid var(--line);background:var(--panel2);color:var(--text);transition:.15s;white-space:nowrap}
+.btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn.primary{background:rgba(0,255,157,.1);border-color:var(--green);color:var(--green)}
+.btn.primary:hover{box-shadow:0 0 14px rgba(0,255,157,.25)}
+.btn.danger{border-color:var(--danger);color:var(--danger);background:rgba(255,76,94,.08)}
+.sec{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--green);font-family:var(--mono)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:var(--mono)}
+.view{flex:1;overflow-y:auto;padding:26px 30px}
+.pagetitle{font-family:var(--mono);font-size:20px;font-weight:700;margin-bottom:4px}
+.pagesub{color:var(--dim);font-size:13px;margin-bottom:22px}
+/* cards */
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px;margin-bottom:26px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;position:relative;overflow:hidden}
+.stat::before{content:"";position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent,var(--cyan))}
+.stat b{display:block;font-family:var(--mono);font-size:26px;color:var(--accent,var(--cyan))}
+.stat span{font-size:12px;color:var(--dim)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:16px}
+.panel h3{font-family:var(--mono);font-size:12.5px;color:var(--cyan);letter-spacing:.5px;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mini{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line);font-size:13px}
+.mini:last-child{border:none}
+.badge{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;font-size:12px;flex:0 0 30px}
+.console{font-family:var(--mono);font-size:12px;background:var(--panel2);border-radius:7px;padding:10px 12px;
+  max-height:140px;overflow-y:auto}
+.console div{color:var(--dim);margin-bottom:3px}
+.console .ok{color:var(--green)}
+/* apps grid */
+.toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.select{font-family:var(--sans);font-size:12.5px;background:var(--panel2);border:1px solid var(--line);
+  color:var(--text);border-radius:6px;padding:8px 10px}
+.appsgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.appcard{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;cursor:default;
+  transition:.15s;position:relative}
+.appcard:hover{border-color:rgba(0,240,255,.4);box-shadow:0 0 18px rgba(0,240,255,.08);transform:translateY(-2px)}
+.appcard .top{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.ic{width:44px;height:44px;border-radius:9px;flex:0 0 44px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:700;font-size:17px;color:#08090D;cursor:pointer;transition:.15s}
+.ic:hover{filter:brightness(1.15);box-shadow:0 0 12px currentColor}
+.appcard h4{font-size:14.5px;font-weight:600}
+.appcard .dom{font-size:11px;color:var(--dim);font-family:var(--mono)}
+.appcard p{font-size:12px;color:var(--dim);line-height:1.5;margin-bottom:12px;min-height:34px}
+.tag{display:inline-block;font-size:10px;font-family:var(--mono);color:var(--purple);background:rgba(178,108,255,.1);
+  border:1px solid rgba(178,108,255,.3);padding:2px 7px;border-radius:4px;margin-bottom:10px}
+.cardbtns{display:flex;gap:8px}
+.cardbtns .btn{flex:1;text-align:center}
+.fav{position:absolute;top:14px;right:14px;cursor:pointer;color:var(--dim);font-size:16px;background:none;border:none}
+.fav.on{color:var(--pink)}
+/* accounts */
+.acclist{display:flex;flex-direction:column;gap:10px}
+.acc{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:14px 16px;
+  display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center}
+.acc .f{font-size:12px;color:var(--dim)}
+.acc .f b{color:var(--text);font-weight:500;font-family:var(--mono)}
+.acc .acts{display:flex;gap:6px}
+.iconbtn{width:30px;height:30px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);
+  color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
+.iconbtn:hover{color:var(--cyan);border-color:var(--cyan)}
+/* terminal */
+.term{background:#000;border:1px solid var(--line);border-radius:8px;padding:16px;font-family:var(--mono);
+  font-size:13px;height:calc(100vh - 220px);display:flex;flex-direction:column}
+.termlog{flex:1;overflow-y:auto;line-height:1.6}
+.termlog .l{color:var(--green)}.termlog .c{color:var(--cyan)}.termlog .e{color:var(--danger)}.termlog .d{color:var(--dim)}
+.terminput{display:flex;align-items:center;gap:8px;margin-top:8px;border-top:1px solid var(--line);padding-top:8px}
+.terminput span{color:var(--green)}
+.terminput input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:13px}
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);z-index:60;
+  display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:12px;width:420px;max-width:100%;
+  padding:22px;box-shadow:0 0 40px rgba(0,240,255,.08)}
+.modal h3{font-family:var(--mono);color:var(--cyan);margin-bottom:16px;font-size:14px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;color:var(--dim);margin-bottom:5px;font-family:var(--mono)}
+.field input,.field select,.field textarea{width:100%;background:var(--panel2);border:1px solid var(--line);
+  border-radius:6px;padding:9px 10px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--cyan)}
+.modalbtns{display:flex;gap:10px;margin-top:18px;justify-content:flex-end}
+.pwrow{display:flex;gap:6px}
+.empty{color:var(--dim);font-size:13px;text-align:center;padding:30px}
+.authwrap{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:var(--bg);position:relative;overflow:hidden}
+.authwrap::before{content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(0,240,255,.08),transparent 60%)}
+.authcard{position:relative;width:360px;max-width:100%;background:var(--panel);border:1px solid var(--line);
+  border-radius:12px;padding:30px 26px;box-shadow:0 0 50px rgba(0,240,255,.08)}
+.authcard .logo{justify-content:center;padding:0 0 22px;font-size:18px}
+.authtabs{display:flex;gap:6px;margin-bottom:20px;background:var(--panel2);border-radius:8px;padding:4px}
+.authtab{flex:1;text-align:center;padding:8px;border-radius:6px;font-family:var(--mono);font-size:12px;
+  color:var(--dim);cursor:pointer}
+.authtab.active{background:var(--cyan);color:#08090D;font-weight:700}
+.autherr{color:var(--danger);font-size:12px;font-family:var(--mono);margin-bottom:10px;min-height:14px}
+.authcard .btn.primary{width:100%;padding:11px;font-size:13px}
+.authhint{text-align:center;color:var(--dim);font-size:11px;margin-top:16px;font-family:var(--mono)}
+.logoutbtn{cursor:pointer}
+.profilehead{display:flex;align-items:center;gap:18px;margin-bottom:22px}
+.profilehead .av{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--pink));
+  display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;font-family:var(--mono);flex:0 0 64px}
+.rolebadge{display:inline-block;font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:4px;margin-top:4px}
+.rolebadge.admin{background:rgba(0,255,157,.12);color:var(--green);border:1px solid rgba(0,255,157,.35)}
+.rolebadge.user{background:rgba(0,240,255,.12);color:var(--cyan);border:1px solid rgba(0,240,255,.35)}
+@media(max-width:820px){
+  .side{position:fixed;left:-270px;top:0;bottom:0;z-index:55;transition:.2s}
+  .side.open{left:0}
+  .grid4,.row2{grid-template-columns:1fr}
+  .view{padding:18px}
+}
+@media (prefers-color-scheme: light){:root{color-scheme:dark}}
+</style>
+</head>
+<body>
+<div id="authScreen"></div>
+<div class="app" id="appRoot" style="display:none">
+  <aside class="side" id="side">
+    <div class="logo">◆ saveallforyou <span>OS</span></div>
+    <div class="navgroup"><h4>ĐIỀU HƯỚNG</h4>
+      <div class="navitem" data-v="dashboard">⌁ Bảng điều khiển</div>
+      <div class="navitem" data-v="apps">▦ Ứng dụng</div>
+      <div class="navitem" data-v="accounts">⚿ Tài khoản</div>
+      <div class="navitem" data-v="favorites">★ Yêu thích</div>
+    </div>
+    <div class="navgroup"><h4>QUẢN LÝ</h4>
+      <div class="navitem" data-v="accounts">⚷ Kho mật khẩu</div>
+      <div class="navitem" data-v="notes">✎ Ghi chú</div>
+    </div>
+    <div class="navgroup"><h4>HỆ THỐNG</h4>
+      <div class="navitem" data-v="profile">◉ Hồ sơ</div>
+      <div class="navitem" data-v="terminal">▸_ Terminal</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="header">
+      <div class="search">🔍<input id="globalSearch" placeholder="Tìm kiếm hệ thống…"></div>
+      <button class="btn primary" id="newAppBtn">+ MỚI</button>
+      <div class="sec"><span class="dot"></span>AN TOÀN</div>
+      <div class="avatar logoutbtn" id="avatarBadge" title="Đăng xuất" onclick="doLogout()">U</div>
+    </header>
+    <div class="view" id="view"></div>
+  </main>
+</div>
+<div id="modalRoot"></div>
+
+<script>
+const LS = { apps:'nros_apps', accs:'nros_accs', fav:'nros_fav', act:'nros_act' };
+const COLORS = ['#00F0FF','#00FF9D','#B26CFF','#FF4FD8','#FFB800','#FF4C5E'];
+const colorFor = s => COLORS[[...s].reduce((a,c)=>a+c.charCodeAt(0),0) % COLORS.length];
+
+const DEFAULT_APPS = [
+ ['Facebook','facebook.com','Mạng xã hội kết nối bạn bè','Social'],
+ ['Instagram','instagram.com','Chia sẻ ảnh và story','Social'],
+ ['Discord','discord.com','Chat thoại & cộng đồng','Social'],
+ ['Reddit','reddit.com','Diễn đàn thảo luận','Social'],
+ ['X','x.com','Mạng xã hội tin tức ngắn','Social'],
+ ['YouTube','youtube.com','Video trực tuyến','Entertainment'],
+ ['Spotify','spotify.com','Nghe nhạc trực tuyến','Entertainment'],
+ ['Netflix','netflix.com','Phim & series','Entertainment'],
+ ['Twitch','twitch.tv','Live-stream game','Entertainment'],
+ ['GitHub','github.com','Lưu trữ mã nguồn','Development'],
+ ['GitLab','gitlab.com','DevOps & Git repo','Development'],
+ ['CodePen','codepen.io','Thử nghiệm front-end','Development'],
+ ['Stack Overflow','stackoverflow.com','Hỏi đáp lập trình','Development'],
+ ['Gmail','mail.google.com','Hộp thư điện tử','Productivity'],
+ ['Google Drive','drive.google.com','Lưu trữ đám mây','Productivity'],
+ ['Notion','notion.so','Ghi chú & quản lý','Productivity'],
+ ['ChatGPT','chat.openai.com','Trợ lý AI','Productivity'],
+ ['Google Calendar','calendar.google.com','Lịch & sự kiện','Productivity'],
+ ['Steam','store.steampowered.com','Nền tảng game PC','Gaming'],
+ ['Roblox','roblox.com','Nền tảng game sáng tạo','Gaming'],
+ ['Epic Games','epicgames.com','Cửa hàng & launcher game','Gaming'],
+].map((a,i)=>({id:'a'+i, name:a[0], domain:a[1], desc:a[2], cat:a[3]}));
+
+function load(k, d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d; }catch{ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
+
+let state = {
+  apps: load(LS.apps, DEFAULT_APPS),
+  accounts: load(LS.accs, []),
+  favs: load(LS.fav, []),
+  activity: load(LS.act, []),
+  view: 'dashboard',
+  pwVisible: {},
+};
+function persist(){ save(LS.apps,state.apps); save(LS.accs,state.accounts); save(LS.fav,state.favs); save(LS.act,state.activity); }
+function logActivity(msg){ state.activity.unshift({msg, t:Date.now()}); state.activity = state.activity.slice(0,8); persist(); }
+function esc(s){ return String(s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function timeAgo(t){ const s=(Date.now()-t)/1000; if(s<60) return 'vừa xong'; if(s<3600) return Math.floor(s/60)+' phút trước'; if(s<86400) return Math.floor(s/3600)+' giờ trước'; return Math.floor(s/86400)+' ngày trước'; }
+
+async function sha256(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function getUser(){ return load('nros_user', null); }
+function bootApp(username){
+  document.getElementById('authScreen').innerHTML = '';
+  document.getElementById('appRoot').style.display = '';
+  const u = getUser();
+  const display = (u && u.displayName) || username;
+  document.getElementById('avatarBadge').textContent = (display||'U')[0].toUpperCase();
+  document.getElementById('avatarBadge').title = `Đăng xuất (${display})`;
+  render();
+}
+function doLogout(){
+  if(!confirm('Đăng xuất khỏi saveallforyou OS?')) return;
+  localStorage.removeItem('nros_session');
+  document.getElementById('appRoot').style.display = 'none';
+  renderAuth('login');
+}
+function renderAuth(mode){
+  const existing = getUser();
+  let body = '';
+  if(mode==='recover'){
+    body = `
+    <div class="field"><label>TÊN ĐĂNG NHẬP</label><input id="au_user" value="${existing?esc(existing.username):''}"></div>
+    <div class="field"><label>MÃ KHÔI PHỤC</label><input id="au_code"></div>
+    <div class="field"><label>MẬT KHẨU MỚI</label><input id="au_pass" type="password" autocomplete="new-password"></div>
+    <div class="field"><label>NHẬP LẠI MẬT KHẨU MỚI</label><input id="au_pass2" type="password" autocomplete="new-password"></div>
+    <button class="btn primary" onclick="submitRecover()">↻ ĐẶT LẠI MẬT KHẨU</button>
+    <div class="authhint"><a href="#" onclick="event.preventDefault();renderAuth('login')" style="color:var(--cyan)">← Quay lại đăng nhập</a></div>`;
+  } else {
+    body = `
+    <div class="authtabs">
+      <div class="authtab ${mode==='login'?'active':''}" onclick="renderAuth('login')">ĐĂNG NHẬP</div>
+      <div class="authtab ${mode==='register'?'active':''}" onclick="renderAuth('register')">TẠO TÀI KHOẢN</div>
+    </div>
+    <div class="field"><label>TÊN ĐĂNG NHẬP</label><input id="au_user" autocomplete="username" value="${existing&&mode==='login'?esc(existing.username):''}"></div>
+    <div class="field"><label>MẬT KHẨU</label><input id="au_pass" type="password" autocomplete="${mode==='login'?'current-password':'new-password'}"></div>
+    ${mode==='register'?'<div class="field"><label>NHẬP LẠI MẬT KHẨU</label><input id="au_pass2" type="password" autocomplete="new-password"></div><div class="field"><label>MÃ KHÔI PHỤC (ghi nhớ để lấy lại mật khẩu sau này)</label><input id="au_code"></div>':''}
+    <button class="btn primary" onclick="${mode==='login'?'submitLogin()':'submitRegister()'}">${mode==='login'?'▶ ĐĂNG NHẬP':'+ TẠO TÀI KHOẢN'}</button>
+    <div class="authhint">
+      ${mode==='login'?'<a href="#" onclick="event.preventDefault();renderAuth(\'recover\')" style="color:var(--cyan)">Quên mật khẩu?</a>':'Dữ liệu được lưu ngay trên trình duyệt này.'}
+    </div>`;
+  }
+  document.getElementById('authScreen').innerHTML = `
+  <div class="authwrap"><div class="authcard">
+    <div class="logo">◆ saveallforyou <span>OS</span></div>
+    <div class="autherr" id="authErr"></div>
+    ${body}
+  </div></div>`;
+  document.getElementById('au_user').focus();
+  const onEnter = e => { if(e.key==='Enter'){ if(mode==='login')submitLogin(); else if(mode==='register')submitRegister(); else submitRecover(); } };
+  document.querySelectorAll('#authScreen input').forEach(i=> i.onkeydown = onEnter);
+}
+function authError(msg){ const e=document.getElementById('authErr'); if(e){ e.style.color='var(--danger)'; e.textContent = msg; } }
+async function submitRegister(){
+  const username = document.getElementById('au_user').value.trim();
+  const pass = document.getElementById('au_pass').value;
+  const pass2 = document.getElementById('au_pass2').value;
+  const code = document.getElementById('au_code').value.trim();
+  if(!username || !pass || !code){ authError('Nhập đủ tên đăng nhập, mật khẩu và mã khôi phục'); return; }
+  if(pass.length < 4){ authError('Mật khẩu cần ít nhất 4 ký tự'); return; }
+  if(pass !== pass2){ authError('Mật khẩu nhập lại không khớp'); return; }
+  if(getUser()){ authError('Máy này đã có tài khoản — hãy đăng nhập'); return; }
+  const hash = await sha256(pass);
+  const recoveryHash = await sha256(code);
+  save('nros_user', { username, hash, role:'user', recoveryHash });
+  localStorage.setItem('nros_session', username);
+  bootApp(username);
+}
+async function submitRecover(){
+  const username = document.getElementById('au_user').value.trim();
+  const code = document.getElementById('au_code').value.trim();
+  const pass = document.getElementById('au_pass').value;
+  const pass2 = document.getElementById('au_pass2').value;
+  const u = getUser();
+  if(!u){ authError('Chưa có tài khoản nào trên máy này'); return; }
+  if(!username || !code || !pass){ authError('Nhập đủ thông tin'); return; }
+  if(pass.length < 4){ authError('Mật khẩu mới cần ít nhất 4 ký tự'); return; }
+  if(pass !== pass2){ authError('Mật khẩu nhập lại không khớp'); return; }
+  if(username !== u.username){ authError('Sai tên đăng nhập hoặc mã khôi phục'); return; }
+  const codeHash = await sha256(code);
+  if(!u.recoveryHash || codeHash !== u.recoveryHash){ authError('Sai tên đăng nhập hoặc mã khôi phục'); return; }
+  u.hash = await sha256(pass);
+  save('nros_user', u);
+  authError('');
+  renderAuth('login');
+  authSuccess('Đã đặt lại mật khẩu — đăng nhập lại nhé.');
+}
+function authSuccess(msg){ const e=document.getElementById('authErr'); if(e){ e.style.color='var(--green)'; e.textContent = msg; } }
+async function submitLogin(){
+  const username = document.getElementById('au_user').value.trim();
+  const pass = document.getElementById('au_pass').value;
+  const u = getUser();
+  if(!u){ authError('Chưa có tài khoản — hãy tạo tài khoản trước'); return; }
+  if(username !== u.username){ authError('Sai tên đăng nhập hoặc mật khẩu'); return; }
+  const hash = await sha256(pass);
+  if(hash !== u.hash){ authError('Sai tên đăng nhập hoặc mật khẩu'); return; }
+  localStorage.setItem('nros_session', username);
+  bootApp(username);
+}
+
+function go(v){ state.view=v; render(); }
+
+/* ---------- views ---------- */
+function viewDashboard(){
+  const stats = [
+    ['Tổng ứng dụng', state.apps.length, 'var(--cyan)'],
+    ['Tài khoản đã lưu', state.accounts.length, 'var(--green)'],
+    ['Ứng dụng yêu thích', state.favs.length, 'var(--purple)'],
+    ['Ghi chú đã lưu', load('nros_notes',[]).length, 'var(--pink)'],
+  ];
+  const recentApps = state.apps.slice(-4).reverse();
+  const recentAccs = state.accounts.slice(-4).reverse();
+  const favApps = state.apps.filter(a=>state.favs.includes(a.id)).slice(0,4);
+  return `
+  <div class="pagetitle">Bảng điều khiển</div>
+  <div class="pagesub">Tổng quan hệ thống của bạn</div>
+  <div class="grid4">${stats.map(([l,v,c])=>`<div class="stat" style="--accent:${c}"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
+  <div class="row2">
+    <div class="panel"><h3>ỨNG DỤNG MỚI THÊM</h3>
+      ${recentApps.length? recentApps.map(a=>`<div class="mini"><div class="badge" style="background:${colorFor(a.name)}22;color:${colorFor(a.name)}">${a.name[0]}</div>${esc(a.name)}<span style="margin-left:auto;color:var(--dim)">${esc(a.cat)}</span></div>`).join('') : '<div class="empty">Chưa có ứng dụng</div>'}
+    </div>
+    <div class="panel"><h3>TÀI KHOẢN MỚI THÊM</h3>
+      ${recentAccs.length? recentAccs.map(a=>`<div class="mini"><div class="badge" style="background:${colorFor(a.site)}22;color:${colorFor(a.site)}">${a.site[0]}</div>${esc(a.site)}<span style="margin-left:auto;color:var(--dim)">${esc(a.username)}</span></div>`).join('') : '<div class="empty">Chưa có tài khoản</div>'}
+    </div>
+  </div>
+  <div class="row2">
+    <div class="panel"><h3>ỨNG DỤNG YÊU THÍCH</h3>
+      ${favApps.length? favApps.map(a=>`<div class="mini"><div class="badge" style="background:${colorFor(a.name)}22;color:${colorFor(a.name)}">${a.name[0]}</div>${esc(a.name)}</div>`).join('') : '<div class="empty">Chưa có mục yêu thích</div>'}
+    </div>
+    <div class="panel"><h3>HOẠT ĐỘNG HỆ THỐNG</h3>
+      <div class="console">${state.activity.length? state.activity.map(a=>`<div><span class="ok">$</span> ${esc(a.msg)} <span style="opacity:.5">· ${timeAgo(a.t)}</span></div>`).join('') : '<div>$ system idle…</div>'}</div>
+    </div>
+  </div>`;
+}
+
+function viewApps(onlyFav){
+  const q = (document.getElementById('globalSearch')?.value||'').toLowerCase();
+  const catSel = document.getElementById('catFilter')?.value || 'all';
+  let list = state.apps.filter(a => (!onlyFav || state.favs.includes(a.id)))
+    .filter(a => a.name.toLowerCase().includes(q) || a.domain.toLowerCase().includes(q))
+    .filter(a => catSel==='all' || a.cat===catSel);
+  const cats = [...new Set(state.apps.map(a=>a.cat))];
+  return `
+  <div class="pagetitle">${onlyFav?'Yêu thích':'Ứng dụng'}</div>
+  <div class="pagesub">${list.length} ứng dụng</div>
+  <div class="toolbar">
+    <select class="select" id="catFilter" onchange="render()">
+      <option value="all">Tất cả danh mục</option>
+      ${cats.map(c=>`<option ${c===catSel?'selected':''}>${esc(c)}</option>`).join('')}
+    </select>
+  </div>
+  <div class="appsgrid">
+    ${list.map(a=>`
+      <div class="appcard">
+        <button class="fav ${state.favs.includes(a.id)?'on':''}" onclick="toggleFav('${a.id}')">★</button>
+        <div class="top">
+          <div class="ic" style="background:${colorFor(a.name)}" title="Mở ${esc(a.name)}" onclick='openApp("${a.id}")'>${a.name[0]}</div>
+          <div><h4>${esc(a.name)}</h4><div class="dom">${esc(a.domain)}</div></div>
+        </div>
+        <span class="tag">${esc(a.cat)}</span>
+        <p>${esc(a.desc)}</p>
+        <div class="cardbtns">
+          <button class="btn primary" onclick='openApp("${a.id}")'>MỞ</button>
+          <button class="btn" onclick='editApp("${a.id}")'>✎</button>
+          <button class="btn danger" onclick='delApp("${a.id}")'>✕</button>
+        </div>
+      </div>`).join('') || '<div class="empty">Không tìm thấy ứng dụng nào.</div>'}
+  </div>`;
+}
+
+function viewAccounts(){
+  const q = (document.getElementById('globalSearch')?.value||'').toLowerCase();
+  const list = state.accounts.filter(a => a.site.toLowerCase().includes(q) || (a.username||'').toLowerCase().includes(q));
+  return `
+  <div class="pagetitle">Quản lý tài khoản</div>
+  <div class="pagesub">${list.length} tài khoản đã lưu · mật khẩu được ẩn mặc định</div>
+  <div class="acclist">
+  ${list.map(a=>`
+    <div class="acc">
+      <div class="badge" style="background:${colorFor(a.site)}22;color:${colorFor(a.site)}">${a.site[0]}</div>
+      <div>
+        <div class="f"><b>${esc(a.site)}</b></div>
+        <div class="f">${esc(a.username||'—')} · ${esc(a.email||'—')}</div>
+        <div class="f">🔒 ${state.pwVisible[a.id] ? esc(a.password||'') : '••••••••'}</div>
+        ${a.phone?`<div class="f">📱 ${esc(a.phone)}</div>`:''}
+        ${a.notes?`<div class="f" style="white-space:pre-wrap">📝 ${esc(a.notes)}</div>`:''}
+      </div>
+      <div class="acts">
+        <button class="iconbtn" title="Hiện/ẩn mật khẩu" onclick='togglePw("${a.id}")'>👁</button>
+        <button class="iconbtn" title="Copy username" onclick='copyText("${esc(a.username||'')}")'>⧉U</button>
+        <button class="iconbtn" title="Copy password" onclick='copyText("${esc(a.password||'')}")'>⧉P</button>
+        ${a.loginUrl?`<button class="iconbtn" title="Đăng nhập" onclick='window.open("${esc(a.loginUrl)}","_blank")'>↗</button>`:''}
+        <button class="iconbtn" title="Sửa" onclick='editAcc("${a.id}")'>✎</button>
+        <button class="iconbtn" title="Xoá" onclick='delAcc("${a.id}")'>✕</button>
+      </div>
+    </div>`).join('') || '<div class="empty">Chưa có tài khoản nào — bấm + NEW để thêm.</div>'}
+  </div>`;
+}
+
+function viewProfile(){
+  const u = getUser() || {};
+  const display = u.displayName || u.username;
+  return `
+  <div class="pagetitle">Hồ sơ</div>
+  <div class="pagesub">Thông tin tài khoản đang đăng nhập</div>
+  <div class="panel">
+    <div class="profilehead">
+      <div class="av">${esc((display||'U')[0].toUpperCase())}</div>
+      <div>
+        <div style="font-size:16px;font-weight:600">${esc(display)}</div>
+        <div style="color:var(--dim);font-size:12px;font-family:var(--mono)">@${esc(u.username||'')}</div>
+        <span class="rolebadge ${u.role==='admin'?'admin':'user'}">${u.role==='admin'?'QUẢN TRỊ VIÊN':'NGƯỜI DÙNG'}</span>
+      </div>
+    </div>
+    <div class="field"><label>TÊN HIỂN THỊ</label><input id="pf_display" value="${esc(u.displayName||'')}" placeholder="${esc(u.username||'')}"></div>
+    <div class="modalbtns" style="justify-content:flex-start"><button class="btn primary" onclick="saveProfile()">Lưu hồ sơ</button></div>
+  </div>
+  <div class="grid4" style="margin-bottom:16px">
+    <div class="stat" style="--accent:var(--cyan)"><b>${state.apps.length}</b><span>Ứng dụng</span></div>
+    <div class="stat" style="--accent:var(--green)"><b>${state.accounts.length}</b><span>Tài khoản đã lưu</span></div>
+    <div class="stat" style="--accent:var(--purple)"><b>${state.favs.length}</b><span>Yêu thích</span></div>
+  </div>
+  <div class="panel">
+    <h3>ĐỔI MẬT KHẨU</h3>
+    <div class="autherr" id="pfErr"></div>
+    <div class="field"><label>MẬT KHẨU HIỆN TẠI</label><input id="pf_old" type="password"></div>
+    <div class="field"><label>MẬT KHẨU MỚI</label><input id="pf_new" type="password"></div>
+    <div class="field"><label>NHẬP LẠI MẬT KHẨU MỚI</label><input id="pf_new2" type="password"></div>
+    <div class="modalbtns" style="justify-content:flex-start"><button class="btn primary" onclick="changePassword()">Đổi mật khẩu</button></div>
+  </div>
+  <div class="panel">
+    <button class="btn danger" onclick="doLogout()">⎋ Đăng xuất</button>
+  </div>`;
+}
+function saveProfile(){
+  const u = getUser(); if(!u) return;
+  u.displayName = document.getElementById('pf_display').value.trim();
+  save('nros_user', u);
+  document.getElementById('avatarBadge').textContent = (u.displayName||u.username||'U')[0].toUpperCase();
+  logActivity('Đã cập nhật hồ sơ'); render();
+}
+async function changePassword(){
+  const err = m=>{ const e=document.getElementById('pfErr'); if(e){ e.style.color = m.startsWith('✓')?'var(--green)':'var(--danger)'; e.textContent=m; } };
+  const u = getUser(); if(!u) return;
+  const oldPass = document.getElementById('pf_old').value;
+  const newPass = document.getElementById('pf_new').value;
+  const newPass2 = document.getElementById('pf_new2').value;
+  if(!oldPass||!newPass){ err('Nhập đủ mật khẩu hiện tại và mật khẩu mới'); return; }
+  if(newPass.length<4){ err('Mật khẩu mới cần ít nhất 4 ký tự'); return; }
+  if(newPass!==newPass2){ err('Mật khẩu mới nhập lại không khớp'); return; }
+  const oldHash = await sha256(oldPass);
+  if(oldHash !== u.hash){ err('Mật khẩu hiện tại không đúng'); return; }
+  u.hash = await sha256(newPass);
+  save('nros_user', u);
+  err('✓ Đã đổi mật khẩu'); logActivity('Đã đổi mật khẩu');
+  document.getElementById('pf_old').value=''; document.getElementById('pf_new').value=''; document.getElementById('pf_new2').value='';
+}
+
+function viewTerminal(){
+  return `
+  <div class="pagetitle">Terminal</div>
+  <div class="pagesub">Gõ <b>help</b> để xem lệnh</div>
+  <div class="term">
+    <div class="termlog" id="termlog">
+      <div class="d">saveallforyou OS terminal v1.0 — gõ "help" để bắt đầu</div>
+    </div>
+    <div class="terminput"><span>$</span><input id="termInput" autocomplete="off" placeholder="nhập lệnh…"></div>
+  </div>`;
+}
+
+function viewNotes(){
+  const notes = load('nros_notes',[]);
+  return `<div class="pagetitle">Notes</div><div class="pagesub">${notes.length} ghi chú</div>
+  <div class="panel"><textarea id="noteBox" rows="8" placeholder="Viết ghi chú…" style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:6px;color:var(--text);padding:10px;font-family:var(--sans)"></textarea>
+  <div class="modalbtns"><button class="btn primary" onclick="addNote()">Lưu ghi chú</button></div></div>
+  <div class="acclist">${notes.map((n,i)=>`<div class="panel"><div style="white-space:pre-wrap;font-size:13px">${esc(n.text)}</div><div style="color:var(--dim);font-size:11px;margin-top:8px">${timeAgo(n.t)} <span style="float:right;cursor:pointer;color:var(--danger)" onclick="delNote(${i})">xoá</span></div></div>`).join('') || '<div class="empty">Chưa có ghi chú</div>'}</div>`;
+}
+
+function render(){
+  const v = document.getElementById('view');
+  document.querySelectorAll('.navitem').forEach(n=>n.classList.toggle('active', n.dataset.v===state.view));
+  if(state.view==='dashboard') v.innerHTML = viewDashboard();
+  else if(state.view==='apps') v.innerHTML = viewApps(false);
+  else if(state.view==='favorites') v.innerHTML = viewApps(true);
+  else if(state.view==='accounts') v.innerHTML = viewAccounts();
+  else if(state.view==='profile') v.innerHTML = viewProfile();
+  else if(state.view==='terminal') v.innerHTML = viewTerminal();
+  else if(state.view==='notes') v.innerHTML = viewNotes();
+  if(state.view==='terminal'){
+    const inp=document.getElementById('termInput');
+    inp.focus();
+    inp.onkeydown = e => { if(e.key==='Enter'){ runCmd(inp.value); inp.value=''; } };
+  }
+}
+
+/* ---------- actions ---------- */
+function openApp(id){ const a=state.apps.find(x=>x.id===id); if(a){ window.open('https://'+a.domain,'_blank'); logActivity(`Đã mở ${a.name}`); } }
+function toggleFav(id){ state.favs.includes(id)? state.favs=state.favs.filter(x=>x!==id): state.favs.push(id); persist(); render(); }
+function delApp(id){ if(!confirm('Xoá ứng dụng này?'))return; state.apps=state.apps.filter(a=>a.id!==id); persist(); render(); }
+function delAcc(id){ if(!confirm('Xoá tài khoản này?'))return; state.accounts=state.accounts.filter(a=>a.id!==id); persist(); render(); }
+function togglePw(id){ state.pwVisible[id]=!state.pwVisible[id]; render(); }
+function copyText(t){ navigator.clipboard?.writeText(t||'').catch(()=>{}); }
+function addNote(){ const box=document.getElementById('noteBox'); if(!box.value.trim())return; const notes=load('nros_notes',[]); notes.unshift({text:box.value,t:Date.now()}); save('nros_notes',notes); render(); }
+function delNote(i){ const notes=load('nros_notes',[]); notes.splice(i,1); save('nros_notes',notes); render(); }
+
+/* ---------- modals ---------- */
+function closeModal(){ document.getElementById('modalRoot').innerHTML=''; }
+function openAppModal(existing){
+  const a = existing || {name:'',domain:'',desc:'',cat:'Social'};
+  document.getElementById('modalRoot').innerHTML = `
+  <div class="overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <h3>${existing?'SỬA':'THÊM'} ỨNG DỤNG</h3>
+      <div class="field"><label>TÊN</label><input id="f_name" value="${esc(a.name)}"></div>
+      <div class="field"><label>TÊN MIỀN (vd: example.com)</label><input id="f_domain" value="${esc(a.domain)}"></div>
+      <div class="field"><label>MÔ TẢ</label><input id="f_desc" value="${esc(a.desc)}"></div>
+      <div class="field"><label>DANH MỤC</label><input id="f_cat" value="${esc(a.cat)}"></div>
+      <div class="modalbtns"><button class="btn" onclick="closeModal()">Huỷ</button><button class="btn primary" onclick='saveApp(${existing?`"${existing.id}"`:'null'})'>Lưu</button></div>
+    </div></div>`;
+  document.getElementById('f_name').focus();
+}
+function saveApp(id){
+  const name=document.getElementById('f_name').value.trim();
+  const domain=document.getElementById('f_domain').value.trim().replace(/^https?:\/\//,'');
+  const desc=document.getElementById('f_desc').value.trim();
+  const cat=document.getElementById('f_cat').value.trim()||'Other';
+  if(!name||!domain){ alert('Cần tên và tên miền'); return; }
+  if(id){ const a=state.apps.find(x=>x.id===id); Object.assign(a,{name,domain,desc,cat}); }
+  else { state.apps.push({id:'a'+Date.now(),name,domain,desc,cat}); logActivity(`Đã thêm ứng dụng ${name}`); }
+  persist(); closeModal(); render();
+}
+function editApp(id){ openAppModal(state.apps.find(a=>a.id===id)); }
+
+function openAccModal(existing){
+  const a = existing || {site:'',username:'',email:'',phone:'',password:'',loginUrl:'',notes:''};
+  document.getElementById('modalRoot').innerHTML = `
+  <div class="overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <h3>${existing?'SỬA':'THÊM'} TÀI KHOẢN</h3>
+      <div class="field"><label>WEBSITE / APP</label><input id="g_site" value="${esc(a.site)}"></div>
+      <div class="field"><label>TÊN ĐĂNG NHẬP</label><input id="g_user" value="${esc(a.username)}"></div>
+      <div class="field"><label>EMAIL</label><input id="g_email" value="${esc(a.email)}"></div>
+      <div class="field"><label>SỐ ĐIỆN THOẠI</label><input id="g_phone" value="${esc(a.phone||'')}"></div>
+      <div class="field"><label>MẬT KHẨU</label><input id="g_pass" value="${esc(a.password)}" type="password"></div>
+      <div class="field"><label>URL ĐĂNG NHẬP</label><input id="g_url" value="${esc(a.loginUrl)}"></div>
+      <div class="field"><label>GHI CHÚ</label><textarea id="g_notes" rows="3">${esc(a.notes||'')}</textarea></div>
+      <div class="modalbtns"><button class="btn" onclick="closeModal()">Huỷ</button><button class="btn primary" onclick='saveAcc(${existing?`"${existing.id}"`:'null'})'>Lưu</button></div>
+    </div></div>`;
+}
+function saveAcc(id){
+  const site=document.getElementById('g_site').value.trim();
+  const username=document.getElementById('g_user').value.trim();
+  const email=document.getElementById('g_email').value.trim();
+  const phone=document.getElementById('g_phone').value.trim();
+  const password=document.getElementById('g_pass').value;
+  const loginUrl=document.getElementById('g_url').value.trim();
+  const notes=document.getElementById('g_notes').value.trim();
+  if(!site){ alert('Cần tên website'); return; }
+  if(id){ const a=state.accounts.find(x=>x.id===id); Object.assign(a,{site,username,email,phone,password,loginUrl,notes}); }
+  else { state.accounts.push({id:'c'+Date.now(),site,username,email,phone,password,loginUrl,notes}); logActivity(`Đã lưu tài khoản ${site}`); }
+  persist(); closeModal(); render();
+}
+function editAcc(id){ openAccModal(state.accounts.find(a=>a.id===id)); }
+
+/* ---------- terminal ---------- */
+const HELP = `help, dashboard, apps, accounts, favorites, notes, search [keyword], open [app-name], clear, settings`;
+function runCmd(raw){
+  const log = document.getElementById('termlog');
+  const print = (html)=>{ const d=document.createElement('div'); d.innerHTML=html; log.appendChild(d); log.scrollTop=log.scrollHeight; };
+  print(`<span class="l">$ ${esc(raw)}</span>`);
+  const [cmd,...rest] = raw.trim().split(/\s+/);
+  const arg = rest.join(' ');
+  switch((cmd||'').toLowerCase()){
+    case 'help': print(`<span class="d">${HELP}</span>`); break;
+    case 'clear': log.innerHTML=''; break;
+    case 'dashboard': case 'apps': case 'accounts': case 'favorites': case 'notes': case 'settings':
+      print(`<span class="c">[OK] Đang chuyển đến ${cmd}...</span>`); setTimeout(()=>go(cmd==='settings'?'dashboard':cmd),300); break;
+    case 'search':
+      print(`<span class="c">[OK] Đang tìm "${esc(arg)}"...</span>`);
+      document.getElementById('globalSearch').value = arg; go('apps'); break;
+    case 'open': {
+      const found = state.apps.find(a=>a.name.toLowerCase()===arg.toLowerCase() || a.name.toLowerCase().includes(arg.toLowerCase()));
+      if(found){ print(`<span class="c">[OK] Đang mở ${esc(found.name)}...</span>`); setTimeout(()=>openApp(found.id),300); }
+      else print(`<span class="e">[LỖI] Không tìm thấy ứng dụng "${esc(arg)}"</span>`);
+      break; }
+    case '': break;
+    default: print(`<span class="e">[LỖI] Lệnh không xác định: ${esc(cmd)} — gõ "help"</span>`);
+  }
+}
+
+/* ---------- wiring ---------- */
+document.querySelectorAll('.navitem').forEach(n=> n.addEventListener('click', ()=> go(n.dataset.v)));
+document.getElementById('newAppBtn').addEventListener('click', ()=>{
+  if(state.view==='accounts') openAccModal(); else openAppModal();
+});
+document.getElementById('globalSearch').addEventListener('input', render);
+(async function initAuth(){
+  if(!localStorage.getItem('nros_admin_seeded_v1')){
+    const hash = await sha256('123456789Ngu');
+    const recoveryHash = await sha256('TEKAMA-RECOVER');
+    save('nros_user', { username:'tekama', hash, role:'admin', recoveryHash });
+    localStorage.setItem('nros_admin_seeded_v1','1');
+  }
+  const u = getUser(); const session = localStorage.getItem('nros_session');
+  if(u && session && session === u.username) bootApp(session);
+  else renderAuth('login');
+})();
+</script>
+</body>
+</html>
